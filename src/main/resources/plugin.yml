@@ -1,0 +1,20 @@
+name: verride-renewed
+version: '1.0-SNAPSHOT'
+main: black.bracken.verriderenewed.VerrideRenewed
+api-version: '1.21'
+authors: ["blackbracken"]
+softdepend: ["WorldGuard"]
+
+permission:
+  verride.*:
+    default: op
+    children:
+      verride.ride: true
+      verride.lift: true
+      verride.pitch: true
+  verride.ride:
+    default: true
+  verride.lift:
+    default: op
+  verride.pitch:
+    default: true
