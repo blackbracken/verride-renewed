@@ -23,11 +23,16 @@ public final class VerrideRenewed extends JavaPlugin {
     }
 
     @Override
+    public void onLoad() {
+        wgSupportFeature = WgSupportFeature.create();
+        wgSupportFeature.registerFlag();
+    }
+
+    @Override
     public void onEnable() {
         instance = this;
 
         piggyBackFeature = new PiggyBackFeature();
-        wgSupportFeature = new WgSupportFeature();
 
         registerListeners();
     }
