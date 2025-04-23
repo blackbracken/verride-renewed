@@ -20,7 +20,7 @@ Copy-Item -Path ./build/libs/*.jar -Destination $pluginsPath
 if (-not(Test-Path -Path ./playground/paper.jar))
 {
     $paperUrl = 'https://api.papermc.io/v2/projects/paper'
-    $version = "1.21.1"
+    $version = "1.21.5"
 #     (Invoke-WebRequest -Headers @{ "Content-type" = "application/json" } -Method GET -Uri $paperUrl).Content `
 #             | ConvertFrom-Json `
 #             | Select-Object -ExpandProperty versions `
