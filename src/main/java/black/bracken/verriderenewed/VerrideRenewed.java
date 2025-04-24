@@ -1,5 +1,6 @@
 package black.bracken.verriderenewed;
 
+import black.bracken.verriderenewed.feature.geysersupport.GeyserSupportFeature;
 import black.bracken.verriderenewed.feature.piggyback.PiggyBackFeature;
 import black.bracken.verriderenewed.feature.wgsupport.WgSupportFeature;
 import black.bracken.verriderenewed.listener.*;
@@ -17,6 +18,7 @@ public final class VerrideRenewed extends JavaPlugin {
 
     private PiggyBackFeature piggyBackFeature;
     private WgSupportFeature wgSupportFeature;
+    private GeyserSupportFeature geyserSupportFeature;
 
     public static VerrideRenewed getInstance() {
         return instance;
@@ -33,6 +35,7 @@ public final class VerrideRenewed extends JavaPlugin {
         instance = this;
 
         piggyBackFeature = new PiggyBackFeature();
+        geyserSupportFeature = GeyserSupportFeature.create();
 
         registerListeners();
     }
@@ -53,6 +56,10 @@ public final class VerrideRenewed extends JavaPlugin {
         return wgSupportFeature;
     }
 
+    public GeyserSupportFeature getGeyserSupportFeature() {
+        return geyserSupportFeature;
+    }
+
     private void registerListeners() {
         final var pm = Bukkit.getPluginManager();
         pm.registerEvents(new OnEntityDamage(this), this);
@@ -63,6 +70,7 @@ public final class VerrideRenewed extends JavaPlugin {
         pm.registerEvents(new OnItemSpawn(), this);
         pm.registerEvents(new OnPlayerDeath(this), this);
         pm.registerEvents(new OnPlayerInteractEntity(this), this);
+        pm.registerEvents(new OnPlayerJoinQuit(this), this);
     }
 
 }

@@ -2,6 +2,7 @@ package black.bracken.verriderenewed.listener;
 
 import black.bracken.verriderenewed.VerrideRenewed;
 import black.bracken.verriderenewed.entity.PlayerId;
+import black.bracken.verriderenewed.feature.geysersupport.GeyserSupportFeature;
 import black.bracken.verriderenewed.feature.piggyback.PiggyBackFeature;
 import black.bracken.verriderenewed.feature.wgsupport.WgSupportFeature;
 import org.bukkit.entity.Player;
@@ -14,22 +15,26 @@ public class OnPlayerInteractEntity implements Listener {
 
     private final PiggyBackFeature piggyBackFeature;
     private final WgSupportFeature wgSupportFeature;
+    private final GeyserSupportFeature geyserSupportFeature;
 
     public OnPlayerInteractEntity(VerrideRenewed instance) {
         this.piggyBackFeature = instance.getPiggyBackFeature();
         this.wgSupportFeature = instance.getWgSupportFeature();
+        this.geyserSupportFeature = instance.getGeyserSupportFeature();
     }
 
     @EventHandler
     public void handle(PlayerInteractEntityEvent event) {
+        final var player = event.getPlayer();
         if (event.getHand() == EquipmentSlot.OFF_HAND) {
             return;
         }
         if (!(event.getRightClicked() instanceof Player clickedPlayer)) {
             return;
         }
-
-        final var player = event.getPlayer();
+        if (!geyserSupportFeature.canUseVerRide(player) || !geyserSupportFeature.canUseVerRide(clickedPlayer)) {
+            return;
+        }
         if (!wgSupportFeature.canUseVerRide(player, player.getLocation())) {
             return;
         }
