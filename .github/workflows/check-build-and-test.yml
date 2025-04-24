@@ -1,10 +1,10 @@
-name: Release JAR on tag
+name: Check build and test
 
 on:
   push:
 
 jobs:
-  build-and-release:
+  build-and-test:
     runs-on: ubuntu-latest
 
     steps:
@@ -20,8 +20,8 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
 
-      - name: Run tests
-        run: ./gradlew test
-
       - name: Build JAR
         run: ./gradlew jar
+
+      - name: Run tests
+        run: ./gradlew test
