@@ -1,90 +1,59 @@
 package black.bracken.verriderenewed.feature.piggyback;
 
 import black.bracken.verriderenewed.entity.ConnectorId;
-import black.bracken.verriderenewed.util.Pair;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import org.bukkit.Location;
-import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.Item;
-import org.bukkit.inventory.ItemStack;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Turtle;
+import org.bukkit.persistence.PersistentDataType;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
 public final class Connector {
 
-    private static final String CONNECTOR_DISPLAY_NAME = "#VERRIDE_RENEWED_CONNECTOR#";
+    private static final NamespacedKey KEY_CONNECTOR_ID = new NamespacedKey("verride-renewed", "connector_id");
+    private static final EntityType CONNECTOR_ENTITY_TYPE = EntityType.TURTLE;
 
     private Connector() {
     }
 
-    public static Item spawnConnector(Location at, ConnectorId candidate) {
+    public static Entity spawnConnector(Location at, ConnectorId candidate) {
         final var world = Objects.requireNonNull(at.getWorld());
-        final var itemStack = createConnectorItemStack(candidate.value());
 
-        final var item = world.dropItem(at, itemStack);
-        item.setPickupDelay(Integer.MAX_VALUE);
-        item.setTicksLived(Integer.MAX_VALUE);
+        final var turtle = (Turtle) world.spawnEntity(at, CONNECTOR_ENTITY_TYPE);
+        turtle.setInvisible(true);
+        turtle.setGravity(false);
+        turtle.setAI(false);
+        turtle.setInvulnerable(true);
+        turtle.setBaby();
+        turtle.setBreed(false);
+        turtle.setAgeLock(true);
 
-        return item;
+        final var container = turtle.getPersistentDataContainer();
+        container.set(
+                KEY_CONNECTOR_ID,
+                PersistentDataType.STRING,
+                candidate.value().toString()
+        );
+
+        return turtle;
     }
 
     public static Optional<ConnectorId> extractConnectorId(Entity entity) {
-        if (!(entity instanceof Item item)) {
+        if (entity.getType() != CONNECTOR_ENTITY_TYPE) {
             return Optional.empty();
         }
 
-        final var itemStack = item.getItemStack();
-        if (itemStack.getType() != Material.TORCH) {
+        final var container = entity.getPersistentDataContainer();
+        final var rawContainerId = container.get(KEY_CONNECTOR_ID, PersistentDataType.STRING);
+        if (rawContainerId == null || rawContainerId.isBlank()) {
             return Optional.empty();
         }
 
-        final var meta = itemStack.getItemMeta();
-        if (meta == null) {
-            return Optional.empty();
-        }
-
-        final var hasMatchedName = switch (meta.displayName()) {
-            case TextComponent text -> CONNECTOR_DISPLAY_NAME.equals(text.content());
-            case null, default -> false;
-        };
-        if (!hasMatchedName) {
-            return Optional.empty();
-        }
-
-        final var rawConnectorId = Optional.ofNullable(meta.lore())
-                // loreの1行目を取得
-                .filter(components -> components.size() == 1)
-                .map(List::getFirst)
-                // 文字列に変換
-                .filter(component -> component instanceof TextComponent)
-                .map(component -> (TextComponent) component)
-                .map(TextComponent::content)
-                // UUIDに変換
-                .map(text -> {
-                    try {
-                        return UUID.fromString(text);
-                    } catch (IllegalArgumentException e) {
-                        return null;
-                    }
-                });
-
-        return rawConnectorId.map(ConnectorId::new);
-    }
-
-    private static ItemStack createConnectorItemStack(UUID uuid) {
-        final var itemStack = ItemStack.of(Material.TORCH);
-
-        final var meta = itemStack.getItemMeta();
-        meta.displayName(Component.text(CONNECTOR_DISPLAY_NAME));
-        meta.lore(List.of(Component.text(uuid.toString())));
-
-        itemStack.setItemMeta(meta);
-        return itemStack;
+        return Optional.of(new ConnectorId(UUID.fromString(rawContainerId)));
     }
 
 }

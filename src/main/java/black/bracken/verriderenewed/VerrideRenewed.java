@@ -34,6 +34,7 @@ public final class VerrideRenewed extends JavaPlugin {
 
         piggyBackFeature = new PiggyBackFeature();
 
+        piggyBackFeature.disbandAll();
         registerListeners();
     }
 
@@ -42,7 +43,6 @@ public final class VerrideRenewed extends JavaPlugin {
         instance = null;
 
         this.getServer().getScheduler().cancelTasks(this);
-        piggyBackFeature.disbandAll();
     }
 
     public PiggyBackFeature getPiggyBackFeature() {
@@ -58,9 +58,6 @@ public final class VerrideRenewed extends JavaPlugin {
         pm.registerEvents(new OnEntityDamage(this), this);
         pm.registerEvents(new OnEntityDeath(this), this);
         pm.registerEvents(new OnEntityDismount(this), this);
-        pm.registerEvents(new OnEntityPickupItem(), this);
-        pm.registerEvents(new OnInventoryPickupItem(), this);
-        pm.registerEvents(new OnItemSpawn(), this);
         pm.registerEvents(new OnPlayerDeath(this), this);
         pm.registerEvents(new OnPlayerInteractEntity(this), this);
     }
