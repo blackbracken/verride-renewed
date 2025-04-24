@@ -9,7 +9,6 @@ import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
@@ -49,9 +48,9 @@ public final class PiggyBackFeature {
             return;
         }
 
-        final var item = Connector.spawnConnector(upper.getLocation(), candidateConnectorId);
-        mountablePlayer.addPassenger(item);
-        item.addPassenger(upper);
+        final var connectorEntity = Connector.spawnConnector(upper.getLocation().clone().add(0, 2.0, 0), candidateConnectorId);
+        mountablePlayer.addPassenger(connectorEntity);
+        connectorEntity.addPassenger(upper);
     }
 
     public void pitch(Player lower) {
@@ -99,9 +98,8 @@ public final class PiggyBackFeature {
     public void disbandAll() {
         connectionList.disbandAll();
 
-        // 防御的にConnectorを削除
         Bukkit.getWorlds().forEach(world -> {
-            world.getEntitiesByClass(Item.class)
+            world.getEntities()
                     .stream()
                     .filter(item -> Connector.extractConnectorId(item).isPresent())
                     .forEach(Entity::remove);

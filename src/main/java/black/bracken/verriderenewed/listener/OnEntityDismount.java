@@ -4,7 +4,7 @@ import black.bracken.verriderenewed.VerrideRenewed;
 import black.bracken.verriderenewed.entity.PlayerId;
 import black.bracken.verriderenewed.feature.piggyback.Connector;
 import black.bracken.verriderenewed.feature.piggyback.PiggyBackFeature;
-import org.bukkit.entity.Item;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -21,11 +21,9 @@ public class OnEntityDismount implements Listener {
     @EventHandler
     public void handle(EntityDismountEvent event) {
         switch (event.getEntity()) {
-            case Item item -> Connector.extractConnectorId(item).ifPresent(piggyBackFeature::disbandByConnectorId);
             case Player player -> piggyBackFeature.disbandByUpperId(PlayerId.of(player));
-            default -> {
-                // Do nothing
-            }
+            case Entity entity ->
+                    Connector.extractConnectorId(entity).ifPresent(piggyBackFeature::disbandByConnectorId);
         }
     }
 
