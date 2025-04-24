@@ -24,7 +24,8 @@ class ConnectionListTest {
         final var lower = new PlayerId(UUID.randomUUID());
         final var connector = new ConnectorId(UUID.randomUUID());
 
-        connectionList.connect(upper, lower, connector);
+        final var connectResult = connectionList.tryConnect(upper, lower, connector);
+        assertTrue(connectResult.isPresent());
 
         final var conn = connectionList.findConnectionByConnectorId(connector).orElseThrow();
         assertEquals(upper, conn.upperId());
@@ -38,7 +39,8 @@ class ConnectionListTest {
         final var lower = new PlayerId(UUID.randomUUID());
         final var connector = new ConnectorId(UUID.randomUUID());
 
-        connectionList.connect(upper, lower, connector);
+        final var connectResult = connectionList.tryConnect(upper, lower, connector);
+        assertTrue(connectResult.isPresent());
 
         assertEquals(lower, connectionList.findConnectionByUpperId(upper).orElseThrow().lowerId());
         assertEquals(upper, connectionList.findConnectionByLowerId(lower).orElseThrow().upperId());
@@ -49,12 +51,16 @@ class ConnectionListTest {
         final var upper1 = new PlayerId(UUID.randomUUID());
         final var lower1 = new PlayerId(UUID.randomUUID());
         final var conn1 = new ConnectorId(UUID.randomUUID());
-        connectionList.connect(upper1, lower1, conn1);
+
+        final var conn1Result = connectionList.tryConnect(upper1, lower1, conn1);
+        assertTrue(conn1Result.isPresent());
 
         final var upper2 = new PlayerId(UUID.randomUUID());
         final var lower2 = new PlayerId(UUID.randomUUID());
         final var conn2 = new ConnectorId(UUID.randomUUID());
-        connectionList.connect(upper2, lower2, conn2);
+
+        final var conn2Result = connectionList.tryConnect(upper2, lower2, conn2);
+        assertTrue(conn2Result.isPresent());
 
         final var firstConn = connectionList.findConnectionByConnectorId(conn1).orElseThrow();
         connectionList.disband(firstConn);
@@ -64,24 +70,13 @@ class ConnectionListTest {
     }
 
     @Test
-    void disbandAll_shouldClearAllConnections() {
-        connectionList.connect(
-                new PlayerId(UUID.randomUUID()),
-                new PlayerId(UUID.randomUUID()),
-                new ConnectorId(UUID.randomUUID())
-        );
-        assertFalse(connectionList.getAllConnections().isEmpty());
-
-        connectionList.disbandAll();
-        assertTrue(connectionList.getAllConnections().isEmpty());
-    }
-
-    @Test
     void findConnectionByConnectorId_whenExists_returnsConnection() {
         final var upper = new PlayerId(UUID.randomUUID());
         final var lower = new PlayerId(UUID.randomUUID());
         final var connector = new ConnectorId(UUID.randomUUID());
-        connectionList.connect(upper, lower, connector);
+
+        final var connectResult = connectionList.tryConnect(upper, lower, connector);
+        assertTrue(connectResult.isPresent());
 
         final var conn = connectionList.findConnectionByConnectorId(connector).orElseThrow();
         assertEquals(connector, conn.connectorId());
@@ -94,7 +89,9 @@ class ConnectionListTest {
         final var upper = new PlayerId(UUID.randomUUID());
         final var lower = new PlayerId(UUID.randomUUID());
         final var connector = new ConnectorId(UUID.randomUUID());
-        connectionList.connect(upper, lower, connector);
+
+        final var connectResult = connectionList.tryConnect(upper, lower, connector);
+        assertTrue(connectResult.isPresent());
 
         final var conn = connectionList.findConnectionByUpperId(upper).orElseThrow();
         assertEquals(connector, conn.connectorId());
@@ -107,7 +104,9 @@ class ConnectionListTest {
         final var upper = new PlayerId(UUID.randomUUID());
         final var lower = new PlayerId(UUID.randomUUID());
         final var connector = new ConnectorId(UUID.randomUUID());
-        connectionList.connect(upper, lower, connector);
+
+        final var connectResult = connectionList.tryConnect(upper, lower, connector);
+        assertTrue(connectResult.isPresent());
 
         final var conn = connectionList.findConnectionByLowerId(lower).orElseThrow();
         assertEquals(connector, conn.connectorId());
@@ -133,33 +132,4 @@ class ConnectionListTest {
         assertTrue(connectionList.findConnectionByLowerId(unknownLower).isEmpty());
     }
 
-    @Test
-    void findMountablePlayerId_noConnection_returnsSelf() {
-        final var lone = new PlayerId(UUID.randomUUID());
-
-        assertEquals(lone, connectionList.findMountablePlayerId(lone).orElseThrow());
-    }
-
-    @Test
-    void findMountablePlayerId_simple_returnsUpper() {
-        final var upper = new PlayerId(UUID.randomUUID());
-        final var lower = new PlayerId(UUID.randomUUID());
-        connectionList.connect(upper, lower, new ConnectorId(UUID.randomUUID()));
-
-        assertEquals(upper, connectionList.findMountablePlayerId(lower).orElseThrow());
-    }
-
-    @Test
-    void findMountablePlayerId_chain_returnsTopMost() {
-        // A ← B ← C
-        final var A = new PlayerId(UUID.randomUUID());
-        final var B = new PlayerId(UUID.randomUUID());
-        final var C = new PlayerId(UUID.randomUUID());
-
-        connectionList.connect(A, B, new ConnectorId(UUID.randomUUID()));
-        connectionList.connect(B, C, new ConnectorId(UUID.randomUUID()));
-
-        assertEquals(A, connectionList.findMountablePlayerId(C).orElseThrow());
-        assertEquals(A, connectionList.findMountablePlayerId(B).orElseThrow());
-    }
 }

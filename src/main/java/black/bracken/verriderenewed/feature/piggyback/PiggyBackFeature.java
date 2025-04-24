@@ -17,6 +17,7 @@ import org.bukkit.util.Vector;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 public final class PiggyBackFeature {
@@ -32,23 +33,25 @@ public final class PiggyBackFeature {
             return;
         }
 
-        final var mountablePlayerId = connectionList.findMountablePlayerId(PlayerId.of(lower)).orElse(null);
-        if (mountablePlayerId == null) {
+        final var candidateConnectorId = new ConnectorId(UUID.randomUUID());
+        final var conn = connectionList.tryConnect(
+                PlayerId.of(upper),
+                PlayerId.of(lower),
+                candidateConnectorId
+        ).orElse(null);
+        if (conn == null) {
             return;
         }
-        final var mountablePlayer = mountablePlayerId.findPlayer().orElse(null);
+
+        final var mountablePlayer = conn.lowerId().findPlayer().orElse(null);
         if (mountablePlayer == null) {
+            connectionList.disband(conn);
             return;
         }
 
-        final var pair = Connector.spawnConnector(upper.getLocation());
-        final var item = pair.first();
-        final var connectorId = pair.second();
-
+        final var item = Connector.spawnConnector(upper.getLocation(), candidateConnectorId);
         mountablePlayer.addPassenger(item);
         item.addPassenger(upper);
-
-        connectionList.connect(PlayerId.of(upper), PlayerId.of(mountablePlayer), connectorId);
     }
 
     public void pitch(Player lower) {
@@ -94,7 +97,6 @@ public final class PiggyBackFeature {
     }
 
     public void disbandAll() {
-        connectionList.getAllConnections().forEach(this::disband);
         connectionList.disbandAll();
 
         // 防御的にConnectorを削除
