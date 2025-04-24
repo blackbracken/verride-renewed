@@ -22,16 +22,15 @@ public final class Connector {
     private Connector() {
     }
 
-    public static Pair<Item, ConnectorId> spawnConnector(Location at) {
+    public static Item spawnConnector(Location at, ConnectorId candidate) {
         final var world = Objects.requireNonNull(at.getWorld());
-        final var uuid = UUID.randomUUID();
-        final var itemStack = createConnectorItemStack(uuid);
+        final var itemStack = createConnectorItemStack(candidate.value());
 
         final var item = world.dropItem(at, itemStack);
         item.setPickupDelay(Integer.MAX_VALUE);
         item.setTicksLived(Integer.MAX_VALUE);
 
-        return new Pair<>(item, new ConnectorId(uuid));
+        return item;
     }
 
     public static Optional<ConnectorId> extractConnectorId(Entity entity) {

@@ -4,7 +4,6 @@ import black.bracken.verriderenewed.entity.ConnectorId;
 import black.bracken.verriderenewed.entity.PlayerId;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,8 +13,18 @@ public final class ConnectionList {
 
     private static final int MAX_CONNECTION_SIZE = 64;
 
-    public void connect(PlayerId upperId, PlayerId lowerId, ConnectorId connectorId) {
-        connections.add(new Connection(upperId, lowerId, connectorId));
+    public Optional<Connection> tryConnect(PlayerId upperId, PlayerId lowerId, ConnectorId connectorId) {
+        if (!(findMountablePlayerId(lowerId).orElse(null) instanceof PlayerId topPlayerId)) {
+            return Optional.empty();
+        }
+
+        if (connections.stream().anyMatch(conn -> conn.upperId() == upperId || conn.lowerId() == topPlayerId)) {
+            return Optional.empty();
+        }
+
+        final var conn = new Connection(upperId, topPlayerId, connectorId);
+        connections.add(conn);
+        return Optional.of(conn);
     }
 
     public void disband(Connection connection) {
@@ -38,7 +47,7 @@ public final class ConnectionList {
         return connections.parallelStream().filter(conn -> conn.lowerId().equals(lowerId)).findFirst();
     }
 
-    public Optional<PlayerId> findMountablePlayerId(PlayerId playerId) {
+    private Optional<PlayerId> findMountablePlayerId(PlayerId playerId) {
         var currentId = playerId;
 
         for (int i = 0; i < MAX_CONNECTION_SIZE; i++) {
@@ -50,10 +59,6 @@ public final class ConnectionList {
         }
 
         return Optional.empty();
-    }
-
-    public List<Connection> getAllConnections() {
-        return Collections.unmodifiableList(connections);
     }
 
 }
