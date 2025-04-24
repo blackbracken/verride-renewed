@@ -3,7 +3,7 @@ version: '1.0-SNAPSHOT'
 main: black.bracken.verriderenewed.VerrideRenewed
 api-version: '1.21'
 authors: ["blackbracken"]
-softdepend: ["WorldGuard"]
+softdepend: ["WorldGuard", "Geyser-Spigot"]
 
 permission:
   verride.*:
