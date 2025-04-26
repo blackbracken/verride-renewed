@@ -66,26 +66,14 @@ public final class PiggyBackFeature {
         disbandByUpperId(PlayerId.of(upper));
 
         (new BukkitRunnable() {
+            @Override
             public void run() {
                 upper.setVelocity(lower.getEyeLocation().getDirection().add((new Vector(0.0, 0.6, 0.0)).normalize()));
                 world.spawnParticle(Particle.EXPLOSION, upper.getLocation(), 1, 0.0, 0.0, 0.0, 0.0);
                 world.playSound(upper.getLocation(), Sound.ENTITY_ENDER_DRAGON_FLAP, 2.0F, 2.0F);
             }
         }).runTaskLater(VerrideRenewed.getInstance(), 4L);
-
-        (new BukkitRunnable() {
-            double height;
-
-            public void run() {
-                if (!upper.isOnline() || upper.isDead() || upper.getLocation().getY() == this.height || upper.getLocation().getBlock().getRelative(BlockFace.DOWN).getType() != Material.AIR) {
-                    this.cancel();
-                }
-
-                this.height = upper.getLocation().getY();
-                world.spawnParticle(Particle.FIREWORK, upper.getLocation(), 4, 0.4, 0.4, 0.4, 0.0);
-                upper.setFallDistance(0.0F);
-            }
-        }).runTaskTimer(VerrideRenewed.getInstance(), 9L, 2L);
+        scheduleRemoveFallDistanceUntilLanding(upper, true);
     }
 
     public List<Connection> findAssociatedConnections(PlayerId playerId) {
@@ -121,11 +109,14 @@ public final class PiggyBackFeature {
     private void disband(Connection connection) {
         connectionList.disband(connection);
 
+        final var lowerMaybe = connection.lowerId().findPlayer();
+        lowerMaybe.ifPresent(lower -> scheduleRemoveFallDistanceUntilLanding(lower, false));
+
         // プレイヤーが存在しないとき、vehicle/passengersは返らないので双方から取得する
         final var upperVehicle = connection.upperId().findPlayer()
                 .flatMap(player -> Optional.ofNullable(player.getVehicle()))
                 .stream();
-        final var lowerPassengers = connection.lowerId().findPlayer()
+        final var lowerPassengers = lowerMaybe
                 .flatMap(player -> Optional.of(player.getPassengers()))
                 .stream()
                 .flatMap(List::stream);
@@ -135,5 +126,26 @@ public final class PiggyBackFeature {
                 .filter(Objects::nonNull)
                 .filter(e -> !e.isDead() && connection.connectorId().equals(Connector.extractConnectorId(e).orElse(null)))
                 .forEach(Entity::remove);
+    }
+
+    private void scheduleRemoveFallDistanceUntilLanding(Player player, boolean withParticle) {
+        final var world = player.getWorld();
+
+        (new BukkitRunnable() {
+            double height;
+
+            @Override
+            public void run() {
+                if (!player.isOnline() || player.isDead() || player.getLocation().getY() == this.height || player.getLocation().getBlock().getRelative(BlockFace.DOWN).getType() != Material.AIR) {
+                    this.cancel();
+                }
+
+                this.height = player.getLocation().getY();
+                if (withParticle) {
+                    world.spawnParticle(Particle.FIREWORK, player.getLocation(), 4, 0.4, 0.4, 0.4, 0.0);
+                }
+                player.setFallDistance(0.0F);
+            }
+        }).runTaskTimer(VerrideRenewed.getInstance(), 7L, 5L);
     }
 }
