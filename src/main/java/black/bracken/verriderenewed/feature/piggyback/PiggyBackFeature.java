@@ -109,14 +109,14 @@ public final class PiggyBackFeature {
     private void disband(Connection connection) {
         connectionList.disband(connection);
 
-        final var lowerMaybe = connection.lowerId().findPlayer();
-        lowerMaybe.ifPresent(lower -> scheduleRemoveFallDistanceUntilLanding(lower, false));
+        final var upperMaybe = connection.upperId().findPlayer();
+        upperMaybe.ifPresent(upper -> scheduleRemoveFallDistanceUntilLanding(upper, false));
 
         // プレイヤーが存在しないとき、vehicle/passengersは返らないので双方から取得する
-        final var upperVehicle = connection.upperId().findPlayer()
+        final var upperVehicle = upperMaybe
                 .flatMap(player -> Optional.ofNullable(player.getVehicle()))
                 .stream();
-        final var lowerPassengers = lowerMaybe
+        final var lowerPassengers = connection.lowerId().findPlayer()
                 .flatMap(player -> Optional.of(player.getPassengers()))
                 .stream()
                 .flatMap(List::stream);
