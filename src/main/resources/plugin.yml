@@ -1,5 +1,5 @@
 name: verride-renewed
-version: '1.1-SNAPSHOT'
+version: '1.2-SNAPSHOT'
 main: black.bracken.verriderenewed.VerrideRenewed
 api-version: '1.21'
 authors: ["blackbracken"]
