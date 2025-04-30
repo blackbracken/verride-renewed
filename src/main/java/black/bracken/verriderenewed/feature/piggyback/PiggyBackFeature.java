@@ -83,6 +83,10 @@ public final class PiggyBackFeature {
         ).filter(Objects::nonNull).toList();
     }
 
+    public Optional<Connection> findAssociatedConnection(ConnectorId connectorId) {
+        return connectionList.findConnectionByConnectorId(connectorId);
+    }
+
     public void disbandAll() {
         connectionList.disbandAll();
 
