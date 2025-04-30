@@ -12,25 +12,23 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
-public final class Connector {
+public record Connector(/* empty */) {
 
     private static final NamespacedKey KEY_CONNECTOR_ID = new NamespacedKey("verride-renewed", "connector_id");
     private static final EntityType CONNECTOR_ENTITY_TYPE = EntityType.TURTLE;
 
-    private Connector() {
-    }
-
     public static Entity spawnConnector(Location at, ConnectorId candidate) {
         final var world = Objects.requireNonNull(at.getWorld());
 
-        final var turtle = (Turtle) world.spawnEntity(at, CONNECTOR_ENTITY_TYPE);
-        turtle.setInvisible(true);
-        turtle.setGravity(false);
-        turtle.setAI(false);
-        turtle.setInvulnerable(true);
-        turtle.setBaby();
-        turtle.setBreed(false);
-        turtle.setAgeLock(true);
+        final var turtle = world.spawn(at, Turtle.class, t -> {
+            t.setInvisible(true);
+            t.setGravity(false);
+            t.setAI(false);
+            t.setInvulnerable(true);
+            t.setBaby();
+            t.setBreed(false);
+            t.setAgeLock(true);
+        });
 
         final var container = turtle.getPersistentDataContainer();
         container.set(
