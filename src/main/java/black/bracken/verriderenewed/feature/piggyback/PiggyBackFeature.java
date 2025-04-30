@@ -13,18 +13,22 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Stream;
 
 public final class PiggyBackFeature {
 
+    private static final Long FALL_DISTANCE_REMOVE_DELAY = 11L;
+
     private final ConnectionList connectionList = new ConnectionList();
+    private final Set<PlayerId> justDismountedPlayerIds = new HashSet<>();
 
     public boolean isMounting(Player player) {
         return connectionList.findConnectionByUpperId(PlayerId.of(player)).isPresent();
+    }
+
+    public boolean isJustDismounted(Player player) {
+        return justDismountedPlayerIds.stream().anyMatch(id -> id.equals(PlayerId.of(player)));
     }
 
     public void mount(Player upper, Player lower) {
@@ -135,6 +139,13 @@ public final class PiggyBackFeature {
     private void scheduleRemoveFallDistanceUntilLanding(Player player, boolean withParticle) {
         final var world = player.getWorld();
 
+        justDismountedPlayerIds.add(PlayerId.of(player));
+        Bukkit.getScheduler().runTaskLater(
+                VerrideRenewed.getInstance(),
+                () -> justDismountedPlayerIds.remove(PlayerId.of(player)),
+                FALL_DISTANCE_REMOVE_DELAY
+        );
+
         (new BukkitRunnable() {
             double height;
 
@@ -150,6 +161,6 @@ public final class PiggyBackFeature {
                 }
                 player.setFallDistance(0.0F);
             }
-        }).runTaskTimer(VerrideRenewed.getInstance(), 11L, 4L);
+        }).runTaskTimer(VerrideRenewed.getInstance(), FALL_DISTANCE_REMOVE_DELAY, 4L);
     }
 }
