@@ -1,7 +1,6 @@
 package black.bracken.verriderenewed.listener;
 
 import black.bracken.verriderenewed.VerrideRenewed;
-import black.bracken.verriderenewed.entity.ConnectorId;
 import black.bracken.verriderenewed.entity.PlayerId;
 import black.bracken.verriderenewed.feature.piggyback.Connector;
 import black.bracken.verriderenewed.feature.piggyback.PiggyBackFeature;
@@ -16,12 +15,12 @@ import org.bukkit.inventory.EquipmentSlot;
 import java.util.Optional;
 import java.util.UUID;
 
-public class OnPlayerInteractEntity implements Listener {
+public class PlayerInteractEntityListener implements Listener {
 
     private final PiggyBackFeature piggyBackFeature;
     private final WgSupportFeature wgSupportFeature;
 
-    public OnPlayerInteractEntity(VerrideRenewed instance) {
+    public PlayerInteractEntityListener(VerrideRenewed instance) {
         this.piggyBackFeature = instance.getPiggyBackFeature();
         this.wgSupportFeature = instance.getWgSupportFeature();
     }
