@@ -49,6 +49,10 @@ public class OnPlayerInteractEntity implements Listener {
             return;
         }
 
+        if (piggyBackFeature.isJustDismounted(clickedPlayer)) {
+            return;
+        }
+
         if (!wgSupportFeature.canUseVerRide(player, player.getLocation())) {
             return;
         }
