@@ -9,13 +9,13 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class ConnectionListTest {
+class ConnectionSetTest {
 
-    private ConnectionList connectionList;
+    private ConnectionSet connectionSet;
 
     @BeforeEach
     void setUp() {
-        connectionList = new ConnectionList();
+        connectionSet = new ConnectionSet();
     }
 
     @Test
@@ -24,10 +24,10 @@ class ConnectionListTest {
         final var lower = new PlayerId(UUID.randomUUID());
         final var connector = new ConnectorId(UUID.randomUUID());
 
-        final var connectResult = connectionList.tryConnect(upper, lower, connector);
+        final var connectResult = connectionSet.tryConnect(upper, lower, connector);
         assertTrue(connectResult.isPresent());
 
-        final var conn = connectionList.findConnectionByConnectorId(connector).orElseThrow();
+        final var conn = connectionSet.findConnectionByConnectorId(connector).orElseThrow();
         assertEquals(upper, conn.upperId());
         assertEquals(lower, conn.lowerId());
         assertEquals(connector, conn.connectorId());
@@ -39,11 +39,11 @@ class ConnectionListTest {
         final var lower = new PlayerId(UUID.randomUUID());
         final var connector = new ConnectorId(UUID.randomUUID());
 
-        final var connectResult = connectionList.tryConnect(upper, lower, connector);
+        final var connectResult = connectionSet.tryConnect(upper, lower, connector);
         assertTrue(connectResult.isPresent());
 
-        assertEquals(lower, connectionList.findConnectionByUpperId(upper).orElseThrow().lowerId());
-        assertEquals(upper, connectionList.findConnectionByLowerId(lower).orElseThrow().upperId());
+        assertEquals(lower, connectionSet.findConnectionByUpperId(upper).orElseThrow().lowerId());
+        assertEquals(upper, connectionSet.findConnectionByLowerId(lower).orElseThrow().upperId());
     }
 
     @Test
@@ -52,21 +52,21 @@ class ConnectionListTest {
         final var lower1 = new PlayerId(UUID.randomUUID());
         final var conn1 = new ConnectorId(UUID.randomUUID());
 
-        final var conn1Result = connectionList.tryConnect(upper1, lower1, conn1);
+        final var conn1Result = connectionSet.tryConnect(upper1, lower1, conn1);
         assertTrue(conn1Result.isPresent());
 
         final var upper2 = new PlayerId(UUID.randomUUID());
         final var lower2 = new PlayerId(UUID.randomUUID());
         final var conn2 = new ConnectorId(UUID.randomUUID());
 
-        final var conn2Result = connectionList.tryConnect(upper2, lower2, conn2);
+        final var conn2Result = connectionSet.tryConnect(upper2, lower2, conn2);
         assertTrue(conn2Result.isPresent());
 
-        final var firstConn = connectionList.findConnectionByConnectorId(conn1).orElseThrow();
-        connectionList.disband(firstConn);
+        final var firstConn = connectionSet.findConnectionByConnectorId(conn1).orElseThrow();
+        connectionSet.disband(firstConn);
 
-        assertFalse(connectionList.findConnectionByConnectorId(conn1).isPresent());
-        assertTrue(connectionList.findConnectionByConnectorId(conn2).isPresent());
+        assertFalse(connectionSet.findConnectionByConnectorId(conn1).isPresent());
+        assertTrue(connectionSet.findConnectionByConnectorId(conn2).isPresent());
     }
 
     @Test
@@ -75,10 +75,10 @@ class ConnectionListTest {
         final var lower = new PlayerId(UUID.randomUUID());
         final var connector = new ConnectorId(UUID.randomUUID());
 
-        final var connectResult = connectionList.tryConnect(upper, lower, connector);
+        final var connectResult = connectionSet.tryConnect(upper, lower, connector);
         assertTrue(connectResult.isPresent());
 
-        final var conn = connectionList.findConnectionByConnectorId(connector).orElseThrow();
+        final var conn = connectionSet.findConnectionByConnectorId(connector).orElseThrow();
         assertEquals(connector, conn.connectorId());
         assertEquals(upper, conn.upperId());
         assertEquals(lower, conn.lowerId());
@@ -90,10 +90,10 @@ class ConnectionListTest {
         final var lower = new PlayerId(UUID.randomUUID());
         final var connector = new ConnectorId(UUID.randomUUID());
 
-        final var connectResult = connectionList.tryConnect(upper, lower, connector);
+        final var connectResult = connectionSet.tryConnect(upper, lower, connector);
         assertTrue(connectResult.isPresent());
 
-        final var conn = connectionList.findConnectionByUpperId(upper).orElseThrow();
+        final var conn = connectionSet.findConnectionByUpperId(upper).orElseThrow();
         assertEquals(connector, conn.connectorId());
         assertEquals(upper, conn.upperId());
         assertEquals(lower, conn.lowerId());
@@ -105,10 +105,10 @@ class ConnectionListTest {
         final var lower = new PlayerId(UUID.randomUUID());
         final var connector = new ConnectorId(UUID.randomUUID());
 
-        final var connectResult = connectionList.tryConnect(upper, lower, connector);
+        final var connectResult = connectionSet.tryConnect(upper, lower, connector);
         assertTrue(connectResult.isPresent());
 
-        final var conn = connectionList.findConnectionByLowerId(lower).orElseThrow();
+        final var conn = connectionSet.findConnectionByLowerId(lower).orElseThrow();
         assertEquals(connector, conn.connectorId());
         assertEquals(upper, conn.upperId());
         assertEquals(lower, conn.lowerId());
@@ -117,19 +117,19 @@ class ConnectionListTest {
     @Test
     void findConnectionByConnectorId_noMatch_returnsEmpty() {
         final var unknown = new ConnectorId(UUID.randomUUID());
-        assertTrue(connectionList.findConnectionByConnectorId(unknown).isEmpty());
+        assertTrue(connectionSet.findConnectionByConnectorId(unknown).isEmpty());
     }
 
     @Test
     void findConnectionByUpperId_noMatch_returnsEmpty() {
         final var unknownUpper = new PlayerId(UUID.randomUUID());
-        assertTrue(connectionList.findConnectionByUpperId(unknownUpper).isEmpty());
+        assertTrue(connectionSet.findConnectionByUpperId(unknownUpper).isEmpty());
     }
 
     @Test
     void findConnectionByLowerId_noMatch_returnsEmpty() {
         final var unknownLower = new PlayerId(UUID.randomUUID());
-        assertTrue(connectionList.findConnectionByLowerId(unknownLower).isEmpty());
+        assertTrue(connectionSet.findConnectionByLowerId(unknownLower).isEmpty());
     }
 
 }

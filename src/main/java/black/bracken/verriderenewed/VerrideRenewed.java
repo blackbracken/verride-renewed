@@ -2,7 +2,9 @@ package black.bracken.verriderenewed;
 
 import black.bracken.verriderenewed.feature.piggyback.PiggyBackFeature;
 import black.bracken.verriderenewed.feature.wgsupport.WgSupportFeature;
-import black.bracken.verriderenewed.listener.*;
+import black.bracken.verriderenewed.listener.EntityDamageListener;
+import black.bracken.verriderenewed.listener.PiggyBackDisbandListener;
+import black.bracken.verriderenewed.listener.PlayerInteractEntityListener;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -55,11 +57,9 @@ public final class VerrideRenewed extends JavaPlugin {
 
     private void registerListeners() {
         final var pm = Bukkit.getPluginManager();
-        pm.registerEvents(new OnEntityDamage(this), this);
-        pm.registerEvents(new OnEntityDeath(this), this);
-        pm.registerEvents(new OnEntityDismount(this), this);
-        pm.registerEvents(new OnPlayerDeath(this), this);
-        pm.registerEvents(new OnPlayerInteractEntity(this), this);
+        pm.registerEvents(new EntityDamageListener(this), this);
+        pm.registerEvents(new PiggyBackDisbandListener(this), this);
+        pm.registerEvents(new PlayerInteractEntityListener(this), this);
     }
 
 }

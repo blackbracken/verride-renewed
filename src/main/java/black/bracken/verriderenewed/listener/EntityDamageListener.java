@@ -7,16 +7,16 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
 
-public class OnEntityDamage implements Listener {
+public class EntityDamageListener implements Listener {
 
     private final PiggyBackFeature piggyBackFeature;
 
-    public OnEntityDamage(VerrideRenewed instance) {
+    public EntityDamageListener(VerrideRenewed instance) {
         this.piggyBackFeature = instance.getPiggyBackFeature();
     }
 
     @EventHandler
-    public void handle(EntityDamageEvent event) {
+    public void onPlayerDamage(EntityDamageEvent event) {
         final var player = event.getEntity() instanceof Player ? (Player) event.getEntity() : null;
         if (player == null) {
             return;

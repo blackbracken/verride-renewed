@@ -20,11 +20,11 @@ public final class PiggyBackFeature {
 
     private static final Long FALL_DISTANCE_REMOVE_DELAY = 11L;
 
-    private final ConnectionList connectionList = new ConnectionList();
+    private final ConnectionSet connectionSet = new ConnectionSet();
     private final Set<PlayerId> justDismountedPlayerIds = new HashSet<>();
 
     public boolean isMounting(Player player) {
-        return connectionList.findConnectionByUpperId(PlayerId.of(player)).isPresent();
+        return connectionSet.findConnectionByUpperId(PlayerId.of(player)).isPresent();
     }
 
     public boolean isJustDismounted(Player player) {
@@ -37,7 +37,7 @@ public final class PiggyBackFeature {
         }
 
         final var candidateConnectorId = new ConnectorId(UUID.randomUUID());
-        final var conn = connectionList.tryConnect(
+        final var conn = connectionSet.tryConnect(
                 PlayerId.of(upper),
                 PlayerId.of(lower),
                 candidateConnectorId
@@ -48,7 +48,7 @@ public final class PiggyBackFeature {
 
         final var mountablePlayer = conn.lowerId().findPlayer().orElse(null);
         if (mountablePlayer == null) {
-            connectionList.disband(conn);
+            connectionSet.disband(conn);
             return;
         }
 
@@ -58,7 +58,7 @@ public final class PiggyBackFeature {
     }
 
     public void pitch(Player lower) {
-        final var upper = connectionList.findConnectionByLowerId(PlayerId.of(lower))
+        final var upper = connectionSet.findConnectionByLowerId(PlayerId.of(lower))
                 .flatMap(conn -> conn.upperId().findPlayer())
                 .orElse(null);
         if (upper == null) {
@@ -82,17 +82,17 @@ public final class PiggyBackFeature {
 
     public List<Connection> findAssociatedConnections(PlayerId playerId) {
         return Stream.of(
-                connectionList.findConnectionByUpperId(playerId).orElse(null),
-                connectionList.findConnectionByLowerId(playerId).orElse(null)
+                connectionSet.findConnectionByUpperId(playerId).orElse(null),
+                connectionSet.findConnectionByLowerId(playerId).orElse(null)
         ).filter(Objects::nonNull).toList();
     }
 
     public Optional<Connection> findAssociatedConnection(ConnectorId connectorId) {
-        return connectionList.findConnectionByConnectorId(connectorId);
+        return connectionSet.findConnectionByConnectorId(connectorId);
     }
 
     public void disbandAll() {
-        connectionList.disbandAll();
+        connectionSet.disbandAll();
 
         Bukkit.getWorlds().forEach(world -> {
             world.getEntities()
@@ -103,19 +103,19 @@ public final class PiggyBackFeature {
     }
 
     public void disbandByConnectorId(ConnectorId connectorId) {
-        connectionList.findConnectionByConnectorId(connectorId).ifPresent(this::disband);
+        connectionSet.findConnectionByConnectorId(connectorId).ifPresent(this::disband);
     }
 
     public void disbandByUpperId(PlayerId upperId) {
-        connectionList.findConnectionByUpperId(upperId).ifPresent(this::disband);
+        connectionSet.findConnectionByUpperId(upperId).ifPresent(this::disband);
     }
 
     public void disbandByLowerId(PlayerId lowerId) {
-        connectionList.findConnectionByLowerId(lowerId).ifPresent(this::disband);
+        connectionSet.findConnectionByLowerId(lowerId).ifPresent(this::disband);
     }
 
     private void disband(Connection connection) {
-        connectionList.disband(connection);
+        connectionSet.disband(connection);
 
         final var upperMaybe = connection.upperId().findPlayer();
         upperMaybe.ifPresent(upper -> scheduleRemoveFallDistanceUntilLanding(upper, false));
