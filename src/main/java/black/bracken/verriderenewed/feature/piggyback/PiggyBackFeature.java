@@ -150,6 +150,6 @@ public final class PiggyBackFeature {
                 }
                 player.setFallDistance(0.0F);
             }
-        }).runTaskTimer(VerrideRenewed.getInstance(), 7L, 5L);
+        }).runTaskTimer(VerrideRenewed.getInstance(), 11L, 4L);
     }
 }
