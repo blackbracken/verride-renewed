@@ -3,13 +3,13 @@ package black.bracken.verriderenewed.feature.piggyback;
 import black.bracken.verriderenewed.entity.ConnectorId;
 import black.bracken.verriderenewed.entity.PlayerId;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 public final class ConnectionList {
 
-    private final List<Connection> connections = new ArrayList<>();
+    private final Map<ConnectorId, Connection> connectionMap = new ConcurrentHashMap<>();
 
     private static final int MAX_CONNECTION_SIZE = 64;
 
@@ -18,33 +18,33 @@ public final class ConnectionList {
             return Optional.empty();
         }
 
-        if (connections.stream().anyMatch(conn -> conn.upperId() == upperId || conn.lowerId() == topPlayerId)) {
+        if (connectionMap.values().stream().anyMatch(conn -> conn.upperId() == upperId || conn.lowerId() == topPlayerId)) {
             return Optional.empty();
         }
 
         final var conn = new Connection(upperId, topPlayerId, connectorId);
-        connections.add(conn);
+        connectionMap.put(connectorId, conn);
         return Optional.of(conn);
     }
 
     public void disband(Connection connection) {
-        connections.remove(connection);
+        connectionMap.remove(connection.connectorId());
     }
 
     public void disbandAll() {
-        connections.clear();
+        connectionMap.clear();
     }
 
     public Optional<Connection> findConnectionByConnectorId(ConnectorId connectorId) {
-        return connections.parallelStream().filter(conn -> conn.connectorId().equals(connectorId)).findFirst();
+        return Optional.ofNullable(connectionMap.get(connectorId));
     }
 
     public Optional<Connection> findConnectionByUpperId(PlayerId upperId) {
-        return connections.parallelStream().filter(conn -> conn.upperId().equals(upperId)).findFirst();
+        return connectionMap.values().stream().filter(conn -> conn.upperId().equals(upperId)).findFirst();
     }
 
     public Optional<Connection> findConnectionByLowerId(PlayerId lowerId) {
-        return connections.parallelStream().filter(conn -> conn.lowerId().equals(lowerId)).findFirst();
+        return connectionMap.values().stream().filter(conn -> conn.lowerId().equals(lowerId)).findFirst();
     }
 
     private Optional<PlayerId> findMountablePlayerId(PlayerId playerId) {
