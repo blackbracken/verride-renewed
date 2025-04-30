@@ -1,14 +1,20 @@
 package black.bracken.verriderenewed.listener;
 
 import black.bracken.verriderenewed.VerrideRenewed;
+import black.bracken.verriderenewed.entity.ConnectorId;
 import black.bracken.verriderenewed.entity.PlayerId;
+import black.bracken.verriderenewed.feature.piggyback.Connector;
 import black.bracken.verriderenewed.feature.piggyback.PiggyBackFeature;
 import black.bracken.verriderenewed.feature.wgsupport.WgSupportFeature;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.inventory.EquipmentSlot;
+
+import java.util.Optional;
+import java.util.UUID;
 
 public class OnPlayerInteractEntity implements Listener {
 
@@ -25,11 +31,24 @@ public class OnPlayerInteractEntity implements Listener {
         if (event.getHand() == EquipmentSlot.OFF_HAND) {
             return;
         }
-        if (!(event.getRightClicked() instanceof Player clickedPlayer)) {
+
+        final var player = event.getPlayer();
+        final var clickedPlayer = switch (event.getRightClicked()) {
+            case Player clicked -> clicked;
+            // コネクタをクリックしたとき、自身と逆位置のプレイヤーをクリックした対象として取得する
+            case Entity entity -> Connector.extractConnectorId(entity)
+                    .flatMap(piggyBackFeature::findAssociatedConnection)
+                    .flatMap(conn -> switch (player.getUniqueId()) {
+                        case UUID uuid when conn.upperId().value().equals(uuid) -> conn.lowerId().findPlayer();
+                        case UUID uuid when conn.lowerId().value().equals(uuid) -> conn.upperId().findPlayer();
+                        default -> Optional.empty();
+                    })
+                    .orElse(null);
+        };
+        if (clickedPlayer == null) {
             return;
         }
 
-        final var player = event.getPlayer();
         if (!wgSupportFeature.canUseVerRide(player, player.getLocation())) {
             return;
         }

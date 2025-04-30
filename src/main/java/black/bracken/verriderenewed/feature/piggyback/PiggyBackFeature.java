@@ -83,6 +83,10 @@ public final class PiggyBackFeature {
         ).filter(Objects::nonNull).toList();
     }
 
+    public Optional<Connection> findAssociatedConnection(ConnectorId connectorId) {
+        return connectionList.findConnectionByConnectorId(connectorId);
+    }
+
     public void disbandAll() {
         connectionList.disbandAll();
 
@@ -146,6 +150,6 @@ public final class PiggyBackFeature {
                 }
                 player.setFallDistance(0.0F);
             }
-        }).runTaskTimer(VerrideRenewed.getInstance(), 7L, 5L);
+        }).runTaskTimer(VerrideRenewed.getInstance(), 11L, 4L);
     }
 }
