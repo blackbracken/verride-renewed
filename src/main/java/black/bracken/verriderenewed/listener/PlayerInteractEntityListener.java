@@ -5,15 +5,14 @@ import black.bracken.verriderenewed.entity.PlayerId;
 import black.bracken.verriderenewed.feature.piggyback.Connector;
 import black.bracken.verriderenewed.feature.piggyback.PiggyBackFeature;
 import black.bracken.verriderenewed.feature.wgsupport.WgSupportFeature;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Turtle;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.inventory.EquipmentSlot;
 
 import java.util.Optional;
-import java.util.UUID;
 
 public class PlayerInteractEntityListener implements Listener {
 
@@ -34,15 +33,17 @@ public class PlayerInteractEntityListener implements Listener {
         final var player = event.getPlayer();
         final var clickedPlayer = switch (event.getRightClicked()) {
             case Player clicked -> clicked;
-            // コネクタをクリックしたとき、自身と逆位置のプレイヤーをクリックした対象として取得する
-            case Entity entity -> Connector.extractConnectorId(entity)
-                    .flatMap(piggyBackFeature::findAssociatedConnection)
-                    .flatMap(conn -> switch (player.getUniqueId()) {
-                        case UUID uuid when conn.upperId().value().equals(uuid) -> conn.lowerId().findPlayer();
-                        case UUID uuid when conn.lowerId().value().equals(uuid) -> conn.upperId().findPlayer();
-                        default -> Optional.empty();
-                    })
-                    .orElse(null);
+            case Turtle turtle -> {
+                final var clickedMaybe = getOppositePiggyBackingPlayer(player, turtle);
+
+                // コネクタをクリックしていたらイベントをキャンセル
+                if (clickedMaybe.isPresent()) {
+                    event.setCancelled(true);
+                }
+
+                yield clickedMaybe.orElse(null);
+            }
+            default -> null;
         };
         if (clickedPlayer == null) {
             return;
@@ -86,6 +87,18 @@ public class PlayerInteractEntityListener implements Listener {
         if (isPlayerNotRiding && player.hasPermission(VerrideRenewed.PERM_LIFT)) {
             piggyBackFeature.mount(clickedPlayer, player);
         }
+    }
+
+    private Optional<Player> getOppositePiggyBackingPlayer(Player player, Turtle turtle) {
+        final var uuid = player.getUniqueId();
+
+        return Connector.extractConnectorId(turtle)
+                .flatMap(piggyBackFeature::findAssociatedConnection)
+                .flatMap(conn -> {
+                    if (uuid.equals(conn.upperId().value())) return conn.lowerId().findPlayer();
+                    if (uuid.equals(conn.lowerId().value())) return conn.upperId().findPlayer();
+                    return Optional.empty();
+                });
     }
 
 }
